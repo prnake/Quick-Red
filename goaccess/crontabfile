@@ -1,0 +1,1 @@
+* * * * * /bin/sh /crontab.sh >/dev/null 2>log &

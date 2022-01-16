@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/bin/goaccess --log-format='%^ %h %^ %^ [%d:%t %^] "%r" %s %b "%R" "%u" "%^" %^ %T %^' --date-format=%d/%b/%Y --time-format=%H:%M:%S -f /usr/share/nginx/html/access.log -a -q > /usr/share/nginx/html/index.html

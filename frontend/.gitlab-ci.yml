@@ -1,0 +1,80 @@
+image: registry.secoder.net/tool/deployer
+
+stages:
+  - pre
+  - build
+  - test
+  - deploy
+
+node-cache:
+  image: node:14
+  stage: pre
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+      - yarn.lock
+  script:
+    - yarn config set registry https://mirrors.cloud.tencent.com/npm/
+    - yarn
+
+build:
+  stage: build
+  needs: [node-cache]
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+      - yarn.lock
+  script: 
+    - export BUILD_IMAGE_NAME=$CI_REGISTRY_IMAGE
+    - export BUILD_IMAGE_TAG=$CI_COMMIT_REF_SLUG
+    - export BUILD_IMAGE_USERNAME=$CI_REGISTRY_USER
+    - export BUILD_IMAGE_PASSWORD=$CI_REGISTRY_PASSWORD
+    - deployer build
+
+.test:
+  image: node:14
+  stage: test
+  needs: [node-cache]
+
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+      - yarn.lock
+  before_script:
+    - yarn config set registry https://mirrors.cloud.tencent.com/npm/
+    - yarn
+
+style-test:
+  extends: .test
+  script:
+    - yarn lint
+
+unit-test:
+  extends: .test
+  script:
+    - yarn test:unit
+    - RET=$?
+    - exit $RET
+  after_script:
+    - SUFFIX=$RANDOM
+    - curl "http://10.0.0.11/sonar-scanner.tar.gz" -s -o "/tmp/sonar-$SUFFIX.tar.gz"
+    - tar -xf "/tmp/sonar-$SUFFIX.tar.gz"  -C /opt
+    - /opt/sonar-scanner/bin/sonar-scanner
+
+deploy:
+  stage: deploy
+  script:
+    - deployer dyno replace $CI_PROJECT_NAME "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" "$REGISTRY_USER" "$REGISTRY_PWD"
+  only:
+    - master
+
+deploy-test:
+  stage: deploy
+  script:
+    - deployer dyno replace frontend-dev "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" "$REGISTRY_USER" "$REGISTRY_PWD"
+  allow_failure: true
+  except:
+    - master
