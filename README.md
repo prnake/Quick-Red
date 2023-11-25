@@ -249,7 +249,7 @@
 
 我们采用 goaccess 对 nginx 进行打点统计，用于优化前后端响应时间，并方便维护人员在线预览。
 
-在线版本可参考https://goaccess-securepapersnake.app.secoder.net/，此处由于软件工程平台自身的安全性远低于我们的标准设计，以及方便第三方检查，只能部署在公网之上。
+在线版本可参考https://goaccess-securepapersnake.app.secoder.net/ ，此处由于软件工程平台自身的安全性远低于我们的标准设计，以及方便第三方检查，只能部署在公网之上。
 
 ![goaccess-securepapersnake.app.secoder.net_](https://i.loli.net/2021/05/08/K2npMxRPEroFOy5.png)
 
